@@ -256,15 +256,15 @@ function analyze(raw,filename){
    add(group,'BW bundle discount',blocks.renters?'Auto/Other':'Auto/Other or Auto/Farmers Home',d==null?null:[other&&'Auto/Other',home&&'Auto/Farmers Home'].filter(Boolean).join(', ')||'Not listed',ok);
   }else{
    const home=discount(d,'Auto','Home'),renters=discount(d,'Auto','Renters');
-   const high=bi!=null&&bi>=200000;
+   const high=bi!=null&&bi>200000;
    if(bi==null)add('Auto Coverage','Bodily injury','Readable per-person BI limit',null,null);
    if(bi===50000||high||blocks.renters){
     const expected=blocks.renters?'Auto/Renters':blocks.home?'Auto/Home':'Auto/Home or Auto/Renters';
     add(group,'Auto bundle discount',expected,d==null?null:[home&&'Auto/Home',renters&&'Auto/Renters'].filter(Boolean).join(', ')||'Not listed',d==null?null:blocks.renters?renters&&!home:blocks.home?home&&!renters:home!==renters);
    }
-   if(high||(blocks.renters&&bi!=null))for(const perk of ['Life','Umbrella']){
+   if(bi!=null)for(const perk of ['Life','Umbrella']){
     const has=discount(d,'Auto',perk);
-    add(group,'Auto/'+perk,high?'Included':'Not included below $200,000 BI',has==null?null:has?'Included':'Not listed',has==null?null:has===high);
+    add(group,'Auto/'+perk,high?'Included above $200,000 BI':'Not included at $200,000 BI or less',has==null?null:has?'Included':'Not listed',has==null?null:has===high);
    }
   }
  }
@@ -286,7 +286,7 @@ function analyze(raw,filename){
  }
  for(const [key,product] of [['home','Home'],['renters','Renters']]){
   // Bristol West does not list separate Auto/Life and Auto/Umbrella discounts.
-  if(!blocks[key]||blocks.auto?.carrier==='Bristol West')continue;
+  if(!blocks[key]||!blocks.auto||blocks.auto.carrier==='Bristol West')continue;
   const d=discountData(blocks[key]);
   for(const perk of ['Life','Umbrella']){
    const has=discount(d,product,perk),autoHas=discount(autoDiscounts,'Auto',perk);
